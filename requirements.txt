@@ -1,0 +1,2 @@
+Twisted
+-e git://github.com/habnabit/panglery.git#egg=Panglery
