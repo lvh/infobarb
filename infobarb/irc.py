@@ -8,15 +8,15 @@ from twisted.words.protocols import irc
 
 class FancyInfobarbPangler(panglery.Pangler):
     def onPrivateMessage(self, _func=None):
-        return self.add_hook(_func,
-                             event="privateMessage",
-                             needs=["user", "message"])
+        return self.subscribe(_func,
+                              event="privateMessage",
+                              needs=["user", "message"])
 
 
     def onChannelMessage(self, _func=None):
-        return self.add_hook(_func,
-                             event="channelMessage",
-                             needs=["user", "channel", "message"])
+        return self.subscribe(_func,
+                              event="channelMessage",
+                              needs=["user", "channel", "message"])
 
 
 
