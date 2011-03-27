@@ -24,10 +24,6 @@ class PanglerCallStubTestCase(unittest.TestCase):
     """
     p = FancyInfobarbPangler()
 
-    def setUp(self):
-        self.p = self.p # TODO: remove when Panglery stops being broken
-
-
     def assertStubCalled(self, stub, *args, **kwargs):
         """
         Asserts that the stub has been called with some positional arguments
