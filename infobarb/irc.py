@@ -19,6 +19,18 @@ class FancyInfobarbPangler(panglery.Pangler):
                               needs=["user", "channel", "message"])
 
 
+    def onPrivateNotice(self, _func=None):
+        return self.subscribe(_func,
+                              event="privateNoticeReceived",
+                              needs=["user", "message"])
+
+
+    def onChannelNotice(self, _func=None):
+        return self.subscribe(_func,
+                              event="channelNoticeReceived",
+                              needs=["user", "channel", "message"])
+
+
 
 class InfobarbClient(irc.IRCClient):
     """
@@ -38,6 +50,21 @@ class InfobarbClient(irc.IRCClient):
             event = "privateMessageReceived"
         else:
             event = "channelMessageReceived"
+
+        self.p.trigger(event=event,
+                       user=user,
+                       channel=channel,
+                       message=message)
+
+
+    def noticed(self, user, channel, message):
+        """
+        Called when a NOTICE is received from the server.
+        """
+        if channel == self.nickname:
+            event = "privateNoticeReceived"
+        else:
+            event = "channelNoticeReceived"
 
         self.p.trigger(event=event,
                        user=user,

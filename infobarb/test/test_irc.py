@@ -47,6 +47,18 @@ class PanglerCallStubTestCase(unittest.TestCase):
 
 
 
+_SAMPLE_DATA = {
+    "user": "lvh",
+    "channel": "#python",
+    "message": "hi"
+}
+
+
+def _buildEventData(*keys):
+    return dict((k, _SAMPLE_DATA[k]) for k in keys)
+
+
+
 class FancyInfobarbPanglerTestCase(PanglerCallStubTestCase):
     """
     Tests that the event hook shortcuts provided by FancyInfobobPangler work.
@@ -64,14 +76,28 @@ class FancyInfobarbPanglerTestCase(PanglerCallStubTestCase):
     def test_onPrivateMessage(self):
         hook = self.p.onPrivateMessage
         event = "privateMessageReceived"
-        eventData = {"user": "lvh", "message": "hi"}
+        eventData = _buildEventData("user", "message")
         self._test_fancyShortcut(hook, event, eventData)
 
 
     def test_onChannelMessage(self):
         hook = self.p.onChannelMessage
         event = "channelMessageReceived"
-        eventData = {"user": "lvh", "channel": "#python", "message": "hi"}
+        eventData = _buildEventData("user", "channel", "message")
+        self._test_fancyShortcut(hook, event, eventData)
+
+
+    def test_onPrivateNotice(self):
+        hook = self.p.onPrivateNotice
+        event = "privateNoticeReceived"
+        eventData = _buildEventData("user", "message")
+        self._test_fancyShortcut(hook, event, eventData)
+
+
+    def test_onChannelNotice(self):
+        hook = self.p.onChannelNotice
+        event = "channelNoticeReceived"
+        eventData = _buildEventData("user", "channel", "message")
         self._test_fancyShortcut(hook, event, eventData)
 
 
@@ -95,7 +121,7 @@ class ClientTestCase(PanglerCallStubTestCase):
         trigger(**event)
 
         if expectedKeys == ALL:
-            expectedKeys = event.keys()
+            expectedKeys = event.iterkeys()
 
         expectedData = dict((k, event[k]) for k in expectedKeys)
         self.assertEventFired(stub, expectedData)
@@ -103,13 +129,10 @@ class ClientTestCase(PanglerCallStubTestCase):
 
     def test_privateMessage(self):
         """
-        A privmsg IRC message from a user fires a privateMessage event.
+        A direct message from a user fires privateMessageReceived.
         """
-        event = {
-            "user": "lvh",
-            "channel": "testbarb",
-            "message": "hello, testbarb!"
-        }
+        event = _buildEventData("user", "message")
+        event["channel"] = self.client.nickname
 
         self._test_clientMessage(hook=self.p.onPrivateMessage,
                                  trigger=self.client.privmsg,
@@ -119,14 +142,34 @@ class ClientTestCase(PanglerCallStubTestCase):
 
     def test_channelMessage(self):
         """
-        A privmsg IRC message from a channel fires a channelMessage event.
+        A message to a channel fires channelMessageReceived.
         """
-        event = {
-            "user": "lvh",
-            "channel": "#python",
-            "message": "Use Twisted."
-        }
+        event = _buildEventData("user", "channel", "message")
 
         self._test_clientMessage(hook=self.p.onChannelMessage,
                                  trigger=self.client.privmsg,
+                                 event=event)
+
+
+    def test_privateNotice(self):
+        """
+        A direct notice fires privateNoticeReceived.
+        """
+        event = _buildEventData("user", "message")
+        event["channel"] = self.client.nickname
+
+        self._test_clientMessage(hook=self.p.onPrivateNotice,
+                                 trigger=self.client.noticed,
+                                 event=event,
+                                 expectedKeys=["user", "message"])
+
+
+    def test_channelNotice(self):
+        """
+        A notice to a channel fires channelNoticeReceived.
+        """
+        event = _buildEventData("user", "channel", "message")
+
+        self._test_clientMessage(hook=self.p.onChannelNotice,
+                                 trigger=self.client.noticed,
                                  event=event)
