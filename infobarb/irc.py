@@ -7,6 +7,9 @@ from twisted.words.protocols import irc
 
 
 class FancyInfobarbPangler(panglery.Pangler):
+    """
+    A Pangler with some infobarb-specific hook shortcuts.
+    """
     def onPrivateMessage(self, _func=None):
         return self.subscribe(_func,
                               event="privateMessageReceived",
@@ -31,6 +34,12 @@ class FancyInfobarbPangler(panglery.Pangler):
                               needs=["user", "channel", "message"])
 
 
+    def onUserJoin(self, _func=None):
+        return self.subscribe(_func,
+                              event="userJoined",
+                              needs=["user", "channel"])
+
+
 
 class InfobarbClient(irc.IRCClient):
     """
@@ -43,9 +52,6 @@ class InfobarbClient(irc.IRCClient):
 
 
     def privmsg(self, user, channel, message):
-        """
-        Called when a privmsg is received from the server.
-        """
         if channel == self.nickname:
             event = "privateMessageReceived"
         else:
@@ -58,9 +64,6 @@ class InfobarbClient(irc.IRCClient):
 
 
     def noticed(self, user, channel, message):
-        """
-        Called when a notice is received from the server.
-        """
         if channel == self.nickname:
             event = "privateNoticeReceived"
         else:
@@ -70,3 +73,7 @@ class InfobarbClient(irc.IRCClient):
                        user=user,
                        channel=channel,
                        message=message)
+
+
+    def userJoined(self, user, channel):
+        self.p.trigger(event="userJoined", user=user, channel=channel)

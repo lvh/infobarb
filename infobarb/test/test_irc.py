@@ -101,6 +101,13 @@ class FancyInfobarbPanglerTestCase(PanglerCallStubTestCase):
         self._test_fancyShortcut(hook, event, eventData)
 
 
+    def test_onUserJoin(self):
+        hook = self.p.onUserJoin
+        event = "userJoined"
+        eventData = _buildEventData("user", "channel")
+        self._test_fancyShortcut(hook, event, eventData)
+
+
 
 ALL = object()
 
@@ -172,4 +179,15 @@ class ClientTestCase(PanglerCallStubTestCase):
 
         self._test_clientMessage(hook=self.p.onChannelNotice,
                                  trigger=self.client.noticed,
+                                 event=event)
+
+
+    def test_userJoined(self):
+        """
+        A user joining a channel fires userJoined.
+        """
+        event = _buildEventData("user", "channel")
+
+        self._test_clientMessage(hook=self.p.onUserJoin,
+                                 trigger=self.client.userJoined,
                                  event=event)
