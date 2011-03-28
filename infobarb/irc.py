@@ -9,13 +9,13 @@ from twisted.words.protocols import irc
 class FancyInfobarbPangler(panglery.Pangler):
     def onPrivateMessage(self, _func=None):
         return self.subscribe(_func,
-                              event="privateMessage",
+                              event="privateMessageReceived",
                               needs=["user", "message"])
 
 
     def onChannelMessage(self, _func=None):
         return self.subscribe(_func,
-                              event="channelMessage",
+                              event="channelMessageReceived",
                               needs=["user", "channel", "message"])
 
 
@@ -35,9 +35,9 @@ class InfobarbClient(irc.IRCClient):
         Called when a PRIVMSG is received from the server.
         """
         if channel == self.nickname:
-            event = "privateMessage"
+            event = "privateMessageReceived"
         else:
-            event = "channelMessage"
+            event = "channelMessageReceived"
 
         self.p.trigger(event=event,
                        user=user,

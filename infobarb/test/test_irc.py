@@ -63,14 +63,14 @@ class FancyInfobarbPanglerTestCase(PanglerCallStubTestCase):
 
     def test_onPrivateMessage(self):
         hook = self.p.onPrivateMessage
-        event = "privateMessage"
+        event = "privateMessageReceived"
         eventData = {"user": "lvh", "message": "hi"}
         self._test_fancyShortcut(hook, event, eventData)
 
 
     def test_onChannelMessage(self):
         hook = self.p.onChannelMessage
-        event = "channelMessage"
+        event = "channelMessageReceived"
         eventData = {"user": "lvh", "channel": "#python", "message": "hi"}
         self._test_fancyShortcut(hook, event, eventData)
 
