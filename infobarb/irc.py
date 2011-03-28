@@ -44,7 +44,7 @@ class InfobarbClient(irc.IRCClient):
 
     def privmsg(self, user, channel, message):
         """
-        Called when a PRIVMSG is received from the server.
+        Called when a privmsg is received from the server.
         """
         if channel == self.nickname:
             event = "privateMessageReceived"
@@ -59,7 +59,7 @@ class InfobarbClient(irc.IRCClient):
 
     def noticed(self, user, channel, message):
         """
-        Called when a NOTICE is received from the server.
+        Called when a notice is received from the server.
         """
         if channel == self.nickname:
             event = "privateNoticeReceived"
