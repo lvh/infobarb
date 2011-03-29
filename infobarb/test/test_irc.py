@@ -1,6 +1,8 @@
 """
 Tests for the IRC abstraction.
 """
+import panglery
+
 from twisted.trial import unittest
 
 from infobarb.irc import FancyInfobarbPangler, InfobarbClient
@@ -22,7 +24,7 @@ class PanglerCallStubTestCase(unittest.TestCase):
     """
     A test case that verifies if a pangler called a stub.
     """
-    p = FancyInfobarbPangler()
+    p = panglery.Pangler()
 
     def assertStubCalled(self, stub, *args, **kwargs):
         """
@@ -63,6 +65,23 @@ class FancyInfobarbPanglerTestCase(PanglerCallStubTestCase):
     """
     Tests that the event hook shortcuts provided by FancyInfobobPangler work.
     """
+    def setUp(self):
+        self.f = FancyInfobarbPangler(self.p)
+
+
+    def test_raiseOnMissingAttribute(self):
+        self.assertRaises(AttributeError, getattr, self.f, "nonexistentHook")
+
+
+    def test_raiseOnOverriddenKwarg(self):
+        """
+        Tests that if you use the fancy shortcut with a keyword that would get
+        overridden by the shortcut, an exception gets raised.
+        """
+        decorator = self.f.onPrivateMessage
+        self.assertRaises(KeyError, decorator, event="privateMessageReceived")
+
+
     def _test_fancyShortcut(self, hook, event, eventData):
         hooks = [hook, hook()] # Hook should work directly and as a decorator
 
@@ -71,38 +90,38 @@ class FancyInfobarbPanglerTestCase(PanglerCallStubTestCase):
             hook(stub)
             self.p.trigger(event=event, **eventData)
             self.assertEventFired(stub, eventData)
-                
+
 
     def test_onPrivateMessage(self):
-        hook = self.p.onPrivateMessage
+        hook = self.f.onPrivateMessage
         event = "privateMessageReceived"
         eventData = _buildEventData("user", "message")
         self._test_fancyShortcut(hook, event, eventData)
 
 
     def test_onChannelMessage(self):
-        hook = self.p.onChannelMessage
+        hook = self.f.onChannelMessage
         event = "channelMessageReceived"
         eventData = _buildEventData("user", "channel", "message")
         self._test_fancyShortcut(hook, event, eventData)
 
 
     def test_onPrivateNotice(self):
-        hook = self.p.onPrivateNotice
+        hook = self.f.onPrivateNotice
         event = "privateNoticeReceived"
         eventData = _buildEventData("user", "message")
         self._test_fancyShortcut(hook, event, eventData)
 
 
     def test_onChannelNotice(self):
-        hook = self.p.onChannelNotice
+        hook = self.f.onChannelNotice
         event = "channelNoticeReceived"
         eventData = _buildEventData("user", "channel", "message")
         self._test_fancyShortcut(hook, event, eventData)
 
 
     def test_onUserJoin(self):
-        hook = self.p.onUserJoin
+        hook = self.f.onUserJoin
         event = "userJoined"
         eventData = _buildEventData("user", "channel")
         self._test_fancyShortcut(hook, event, eventData)
@@ -116,6 +135,8 @@ ALL = object()
 class ClientTestCase(PanglerCallStubTestCase):
     def setUp(self):
         super(ClientTestCase, self).setUp()
+
+        self.f = FancyInfobarbPangler(self.p)
 
         self.client = InfobarbClient(self.p)
         self.client.nickname = "testbarb"
@@ -141,7 +162,7 @@ class ClientTestCase(PanglerCallStubTestCase):
         event = _buildEventData("user", "message")
         event["channel"] = self.client.nickname
 
-        self._test_clientMessage(hook=self.p.onPrivateMessage,
+        self._test_clientMessage(hook=self.f.onPrivateMessage,
                                  trigger=self.client.privmsg,
                                  event=event,
                                  expectedKeys=["user", "message"])
@@ -153,7 +174,7 @@ class ClientTestCase(PanglerCallStubTestCase):
         """
         event = _buildEventData("user", "channel", "message")
 
-        self._test_clientMessage(hook=self.p.onChannelMessage,
+        self._test_clientMessage(hook=self.f.onChannelMessage,
                                  trigger=self.client.privmsg,
                                  event=event)
 
@@ -165,7 +186,7 @@ class ClientTestCase(PanglerCallStubTestCase):
         event = _buildEventData("user", "message")
         event["channel"] = self.client.nickname
 
-        self._test_clientMessage(hook=self.p.onPrivateNotice,
+        self._test_clientMessage(hook=self.f.onPrivateNotice,
                                  trigger=self.client.noticed,
                                  event=event,
                                  expectedKeys=["user", "message"])
@@ -177,7 +198,7 @@ class ClientTestCase(PanglerCallStubTestCase):
         """
         event = _buildEventData("user", "channel", "message")
 
-        self._test_clientMessage(hook=self.p.onChannelNotice,
+        self._test_clientMessage(hook=self.f.onChannelNotice,
                                  trigger=self.client.noticed,
                                  event=event)
 
@@ -188,6 +209,6 @@ class ClientTestCase(PanglerCallStubTestCase):
         """
         event = _buildEventData("user", "channel")
 
-        self._test_clientMessage(hook=self.p.onUserJoin,
+        self._test_clientMessage(hook=self.f.onUserJoin,
                                  trigger=self.client.userJoined,
                                  event=event)

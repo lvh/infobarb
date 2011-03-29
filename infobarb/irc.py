@@ -6,39 +6,50 @@ import panglery
 from twisted.words.protocols import irc
 
 
-class FancyInfobarbPangler(panglery.Pangler):
+class FancyInfobarbPangler(object):
     """
-    A Pangler with some infobarb-specific hook shortcuts.
+    Some infobarb-specific event hook shortcuts.
     """
-    def onPrivateMessage(self, _func=None):
-        return self.subscribe(_func,
-                              event="privateMessageReceived",
-                              needs=["user", "message"])
+    def __init__(self, boundPangler):
+        self.p = boundPangler
 
 
-    def onChannelMessage(self, _func=None):
-        return self.subscribe(_func,
-                              event="channelMessageReceived",
-                              needs=["user", "channel", "message"])
+    _SHORTCUTS = {
+        "onPrivateMessage": {
+            "event": "privateMessageReceived",
+            "needs": ("user", "message")},
+
+        "onChannelMessage": {
+            "event": "channelMessageReceived",
+            "needs": ("user", "channel", "message")},
+
+        "onPrivateNotice": {
+            "event": "privateNoticeReceived",
+            "needs": ("user", "message")},
+
+        "onChannelNotice": {
+            "event": "channelNoticeReceived",
+            "needs": ("user", "channel", "message")},
+
+        "onUserJoin": {
+            "event": "userJoined",
+            "needs": ("user", "channel")}
+        }
 
 
-    def onPrivateNotice(self, _func=None):
-        return self.subscribe(_func,
-                              event="privateNoticeReceived",
-                              needs=["user", "message"])
+def _buildShortcut(defaultKwargs):
+    def shortcut(self, _func=None, **kwargs):
+        if any(k in defaultKwargs for k in kwargs):
+            raise KeyError("duplicated shortcut kwarg")
+
+        kwargs.update(defaultKwargs)
+        return self.p.subscribe(_func, **kwargs)
+
+    return shortcut
 
 
-    def onChannelNotice(self, _func=None):
-        return self.subscribe(_func,
-                              event="channelNoticeReceived",
-                              needs=["user", "channel", "message"])
-
-
-    def onUserJoin(self, _func=None):
-        return self.subscribe(_func,
-                              event="userJoined",
-                              needs=["user", "channel"])
-
+for name, defaultKwargs in FancyInfobarbPangler._SHORTCUTS.iteritems():
+    setattr(FancyInfobarbPangler, name, _buildShortcut(defaultKwargs))
 
 
 class InfobarbClient(irc.IRCClient):
