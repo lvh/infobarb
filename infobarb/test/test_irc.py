@@ -78,8 +78,8 @@ class FancyInfobarbPanglerTestCase(PanglerCallStubTestCase):
         Tests that if you use the fancy shortcut with a keyword that would get
         overridden by the shortcut, an exception gets raised.
         """
-        decorator = self.f.onPrivateMessage
-        self.assertRaises(KeyError, decorator, event="privateMessageReceived")
+        decorator = self.f.onUserJoin
+        self.assertRaises(KeyError, decorator, event="whatever")
 
 
     def _test_fancyShortcut(self, hook, event, eventData):
