@@ -178,5 +178,9 @@ class FancyInfobarbPangler(object):
         "userLeft": {
             "name": "onUserLeave",
             "args": ("user", "channel"),
-            }
+            },
+        "userQuit": {
+            "name": "onUserQuit",
+            "args": ("user", "quitMessage"),
+            },
     }

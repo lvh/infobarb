@@ -67,6 +67,7 @@ _SAMPLE_DATA = {
     "user": "lvh",
     "channel": "#python",
     "message": "hi",
+    "quitMessage": "bye",
     "nickname": "testbarb"
 }
 
@@ -305,3 +306,14 @@ class ClientTestCase(PanglerCallStubTestCase):
         self._test_clientMessage(eventData=eventData,
                                  hook=self.f.onUserLeave,
                                  trigger=self.client.userLeft)
+
+
+    def test_userQuit(self):
+        """
+        A user quitting fires userQuit.
+        """
+        eventData = _buildEventData("user", "quitMessage")
+
+        self._test_clientMessage(eventData=eventData,
+                                 hook=self.f.onUserQuit,
+                                 trigger=self.client.userQuit)
