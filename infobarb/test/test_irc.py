@@ -215,8 +215,6 @@ class ClientTestCase(PanglerCallStubTestCase):
         stub = CallStub()
         hook(stub)
 
-        import pdb; pdb.set_trace()
-
         argSpec = self.client._builtinEventArgs[trigger.eventName]
         triggerArgs = [eventData[name] for name in argSpec]
 
@@ -237,7 +235,7 @@ class ClientTestCase(PanglerCallStubTestCase):
         eventData["channel"] = self.client.nickname
 
         self._test_clientMessage(eventData=eventData,
-                                 hook=self.f.onChannelMessage,
+                                 hook=self.f.onPrivateMessage,
                                  trigger=self.client.privmsg,
                                  expectedKeys=["user", "message"])
 
@@ -246,23 +244,23 @@ class ClientTestCase(PanglerCallStubTestCase):
         """
         A message to a channel fires channelMessageReceived.
         """
-        event = _buildEventData("user", "channel", "message")
+        eventData = _buildEventData("user", "channel", "message")
 
-        self._test_clientMessage(hook=self.f.onChannelMessage,
-                                 trigger=self.client.privmsg,
-                                 event=event)
+        self._test_clientMessage(eventData=eventData,
+                                 hook=self.f.onChannelMessage,
+                                 trigger=self.client.privmsg)
 
 
     def test_privateNotice(self):
         """
         A direct notice fires privateNoticeReceived.
         """
-        event = _buildEventData("user", "message")
-        event["channel"] = self.client.nickname
+        eventData = _buildEventData("user", "message")
+        eventData["channel"] = self.client.nickname
 
-        self._test_clientMessage(hook=self.f.onPrivateNotice,
+        self._test_clientMessage(eventData=eventData,
+                                 hook=self.f.onPrivateNotice,
                                  trigger=self.client.noticed,
-                                 event=event,
                                  expectedKeys=["user", "message"])
 
 
@@ -270,19 +268,19 @@ class ClientTestCase(PanglerCallStubTestCase):
         """
         A notice to a channel fires channelNoticeReceived.
         """
-        event = _buildEventData("user", "channel", "message")
+        eventData = _buildEventData("user", "channel", "message")
 
-        self._test_clientMessage(hook=self.f.onChannelNotice,
-                                 trigger=self.client.noticed,
-                                 event=event)
+        self._test_clientMessage(eventData=eventData,
+                                 hook=self.f.onChannelNotice,
+                                 trigger=self.client.noticed)
 
 
     def test_userJoined(self):
         """
         A user joining a channel fires userJoined.
         """
-        event = _buildEventData("user", "channel")
+        eventData = _buildEventData("user", "channel")
 
-        self._test_clientMessage(hook=self.f.onUserJoin,
-                                 trigger=self.client.userJoined,
-                                 event=event)
+        self._test_clientMessage(eventData=eventData,
+                                 hook=self.f.onUserJoin,
+                                 trigger=self.client.userJoined)
