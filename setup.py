@@ -9,4 +9,10 @@ setup(name='infobarb',
       author_email='_@lvh.cc',
       url='https://github.com/lvh/infobarb',
       packages=['infobarb', 'infobarb.test'],
-      license='ISC')
+      license='ISC',
+      classifiers=[
+        "Development Status :: 2 - Pre-Alpha",
+        "Framework :: Twisted",
+        "License :: OSI Approved :: ISC License (ISCL)",
+        "Topic :: Communications :: Chat :: Internet Relay Chat",
+        ])
