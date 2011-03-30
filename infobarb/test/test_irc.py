@@ -27,9 +27,7 @@ class PanglerCallStubTestCase(unittest.TestCase):
     p = panglery.Pangler()
 
     def setUp(self):
-        #p = self.p
         irc.addDefaultDispatchHooks(self.p)
-        assert len(self.p.hooks) == 2
 
 
     def assertStubCalled(self, stub, *args, **kwargs):
