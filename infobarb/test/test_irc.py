@@ -61,16 +61,22 @@ class PanglerCallStubTestCase(unittest.TestCase):
         self.assertStubCalled(stub, self, self.p, **eventData)
 
 
+NICKNAME = "testbarb"
 
 _SAMPLE_DATA = {
     "user": "lvh",
     "channel": "#python",
-    "message": "hi"
+    "message": "hi",
+    "nickname": "testbarb"
+}
+
+_KEY_MASK = {
+    "nickname": "channel",
 }
 
 
 def _buildEventData(*keys):
-    return dict((k, _SAMPLE_DATA[k]) for k in keys)
+    return dict((_KEY_MASK.get(k, k), _SAMPLE_DATA[k]) for k in keys)
 
 
 
@@ -201,14 +207,13 @@ class FancyInfobarbPanglerTestCase(PanglerCallStubTestCase):
 ALL = object()
 
 
-
 class ClientTestCase(PanglerCallStubTestCase):
     def setUp(self):
         super(ClientTestCase, self).setUp()
         self.f = irc.FancyInfobarbPangler(self.p)
 
         self.client = irc.InfobarbClient(self.p)
-        self.client.nickname = "testbarb"
+        self.client.nickname = NICKNAME
 
 
     def _test_clientMessage(self, eventData, hook, trigger, expectedKeys=ALL):
@@ -231,8 +236,7 @@ class ClientTestCase(PanglerCallStubTestCase):
         """
         A direct message from a user fires privateMessageReceived.
         """
-        eventData = _buildEventData("user", "message")
-        eventData["channel"] = self.client.nickname
+        eventData = _buildEventData("user", "nickname", "message")
 
         self._test_clientMessage(eventData=eventData,
                                  hook=self.f.onPrivateMessage,
@@ -255,8 +259,7 @@ class ClientTestCase(PanglerCallStubTestCase):
         """
         A direct notice fires privateNoticeReceived.
         """
-        eventData = _buildEventData("user", "message")
-        eventData["channel"] = self.client.nickname
+        eventData = _buildEventData("user", "nickname", "message")
 
         self._test_clientMessage(eventData=eventData,
                                  hook=self.f.onPrivateNotice,
