@@ -37,6 +37,8 @@ def eventHookMagic(cls):
 
         callback = _buildCallback(eventName, argNames)
         callback.eventName = eventName
+        callback.__name__ = callbackName
+
         setattr(cls, callbackName, callback)
 
     return cls
@@ -90,7 +92,7 @@ def onPrivmsgReceived(self, p, user, channel, message):
     """
     Diferentiates privmsgs as private (directed at me) and those to a channel.
     """
-    if channel == self.nickname:
+    if channel == self.client.nickname:
         event = "privateMessageReceived"
     else:
         event = "channelMessageReceived"
@@ -103,7 +105,7 @@ def onNoticeReceived(self, p, user, channel, message):
     """
     Diferentiates notices as private (directed at me) and those to a channel.
     """
-    if channel == self.nickname:
+    if channel == self.client.nickname:
         event = "privateNoticeReceived"
     else:
         event = "channelNoticeReceived"

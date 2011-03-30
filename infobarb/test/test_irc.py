@@ -20,6 +20,15 @@ class CallStub(object):
 
 
 
+class MockClient(object):
+    @classmethod
+    def fromNickname(cls, nickname):
+        c = cls()
+        c.nickname = nickname
+        return c
+        
+
+
 class PanglerCallStubTestCase(unittest.TestCase):
     """
     A test case that verifies if a pangler called a stub.
@@ -70,7 +79,9 @@ class DefaultDispatchHookTestCase(PanglerCallStubTestCase):
         super(DefaultDispatchHookTestCase, self).setUp()
 
         irc.addDefaultDispatchHooks(self.p)
-        self.nickname = "testbarb"
+
+        self.client = MockClient.fromNickname("testbarb")
+
 
     def _test_dispatchHook(self, sourceEvent, targetEvent, eventData):
         stub = CallStub()
@@ -82,7 +93,7 @@ class DefaultDispatchHookTestCase(PanglerCallStubTestCase):
 
     def test_privmsgReceived_privateMessage(self):
         eventData = _buildEventData("user", "message")
-        eventData["channel"] = self.nickname
+        eventData["channel"] = self.client.nickname
 
         sourceEvent = "privmsgReceived"
         targetEvent = "privateMessageReceived"
@@ -101,7 +112,7 @@ class DefaultDispatchHookTestCase(PanglerCallStubTestCase):
 
     def test_noticeReceived_privateNotice(self):
         eventData = _buildEventData("user", "message")
-        eventData["channel"] = self.nickname
+        eventData["channel"] = self.client.nickname
 
         sourceEvent = "noticeReceived"
         targetEvent = "privateNoticeReceived"
@@ -203,6 +214,8 @@ class ClientTestCase(PanglerCallStubTestCase):
     def _test_clientMessage(self, eventData, hook, trigger, expectedKeys=ALL):
         stub = CallStub()
         hook(stub)
+
+        import pdb; pdb.set_trace()
 
         argSpec = self.client._builtinEventArgs[trigger.eventName]
         triggerArgs = [eventData[name] for name in argSpec]
