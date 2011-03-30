@@ -183,4 +183,8 @@ class FancyInfobarbPangler(object):
             "name": "onUserQuit",
             "args": ("user", "quitMessage"),
             },
+        "userKicked": {
+            "name": "onUserKick",
+            "args": ("kickee", "channel", "kicker", "message")
+            }
     }

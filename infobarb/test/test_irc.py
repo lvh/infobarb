@@ -68,7 +68,9 @@ _SAMPLE_DATA = {
     "channel": "#python",
     "message": "hi",
     "quitMessage": "bye",
-    "nickname": "testbarb"
+    "nickname": "testbarb",
+    "kicker": "lvh",
+    "kickee": "cheater"
 }
 
 _KEY_MASK = {
@@ -211,8 +213,16 @@ class FancyInfobarbPanglerTestCase(PanglerCallStubTestCase):
         self._test_fancyShortcut(hook, event, eventData)
 
 
+    def test_onUserKicked(self):
+        hook = self.f.onUserKick
+        event = "userKicked"
+        eventData = _buildEventData("kickee", "channel", "kicker", "message")
+        self._test_fancyShortcut(hook, event, eventData)
+
+
 
 ALL = object()
+
 
 
 class ClientTestCase(PanglerCallStubTestCase):
@@ -317,3 +327,14 @@ class ClientTestCase(PanglerCallStubTestCase):
         self._test_clientMessage(eventData=eventData,
                                  hook=self.f.onUserQuit,
                                  trigger=self.client.userQuit)
+
+
+    def test_userKicked(self):
+        """
+        A user being kicked fires userKicked.
+        """
+        eventData = _buildEventData("kickee", "channel", "kicker", "message")
+
+        self._test_clientMessage(eventData=eventData,
+                                 hook=self.f.onUserKick,
+                                 trigger=self.client.userKicked)
