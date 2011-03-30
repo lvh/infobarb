@@ -5,7 +5,7 @@ import panglery
 
 from twisted.trial import unittest
 
-from infobarb.irc import FancyInfobarbPangler, InfobarbClient
+from infobarb import irc
 
 
 class CallStub(object):
@@ -25,6 +25,10 @@ class PanglerCallStubTestCase(unittest.TestCase):
     A test case that verifies if a pangler called a stub.
     """
     p = panglery.Pangler()
+
+    def setUp(self):
+        irc.addDefaultDispatchHooks(self.p)
+
 
     def assertStubCalled(self, stub, *args, **kwargs):
         """
@@ -61,12 +65,48 @@ def _buildEventData(*keys):
 
 
 
+class DefaultDispatchHookTestCase(PanglerCallStubTestCase):
+    def setUp(self):
+        super(DefaultDispatchHookTestCase, self).setUp()
+
+        irc.addDefaultDispatchHooks(self.p)
+        self.nickname = "testbarb"
+
+
+    def test_privmsgReceived_privateMessage(self):
+        eventData = _buildEventData("user", "message")
+        eventData["channel"] = self.nickname
+
+        p.trigger(event="privmsgReceived", **eventData)
+
+
+    def test_privmsgReceived_channelMessage(self):
+        eventData = _buildEventData("user", "channel", "message")
+
+        p.trigger(event="privmsgReceived", **eventData)
+
+
+    def test_noticeReceived_privateNotice(self):
+        eventData = _buildEventData("user", "message")
+        eventData["channel"] = self.nickname
+
+        p.trigger(event="noticeReceived", **eventData)
+
+
+    def test_noticeReceived_privateNotice(self):
+        eventData = _buildEventData("user", "channel", "message")
+
+        p.trigger(event="noticeReceived", **eventData)
+
+        
+
 class FancyInfobarbPanglerTestCase(PanglerCallStubTestCase):
     """
     Tests that the event hook shortcuts provided by FancyInfobobPangler work.
     """
     def setUp(self):
-        self.f = FancyInfobarbPangler(self.p)
+        super(FancyInfobarbPanglerTestCase, self).setUp()
+        self.f = irc.FancyInfobarbPangler(self.p)
 
 
     def test_raiseOnMissingAttribute(self):
@@ -135,23 +175,25 @@ ALL = object()
 class ClientTestCase(PanglerCallStubTestCase):
     def setUp(self):
         super(ClientTestCase, self).setUp()
+        self.f = irc.FancyInfobarbPangler(self.p)
 
-        self.f = FancyInfobarbPangler(self.p)
-
-        self.client = InfobarbClient(self.p)
+        self.client = irc.InfobarbClient(self.p)
         self.client.nickname = "testbarb"
 
 
-    def _test_clientMessage(self, hook, trigger, event, expectedKeys=ALL):
+    def _test_clientMessage(self, eventData, hook, trigger, expectedKeys=ALL):
         stub = CallStub()
         hook(stub)
 
-        trigger(**event)
+        argSpec = self.client._builtinEventArgs[trigger.eventName]
+        triggerArgs = [eventData[name] for name in argSpec]
 
-        if expectedKeys == ALL:
-            expectedKeys = event.iterkeys()
+        trigger(*triggerArgs)
 
-        expectedData = dict((k, event[k]) for k in expectedKeys)
+        if expectedKeys is ALL:
+            expectedKeys = eventData.iterkeys()
+
+        expectedData = dict((k, eventData[k]) for k in expectedKeys)
         self.assertEventFired(stub, expectedData)
 
 
@@ -159,12 +201,12 @@ class ClientTestCase(PanglerCallStubTestCase):
         """
         A direct message from a user fires privateMessageReceived.
         """
-        event = _buildEventData("user", "message")
-        event["channel"] = self.client.nickname
+        eventData = _buildEventData("user", "message")
+        eventData["channel"] = self.client.nickname
 
-        self._test_clientMessage(hook=self.f.onPrivateMessage,
+        self._test_clientMessage(eventData=eventData,
+                                 hook=self.f.onChannelMessage,
                                  trigger=self.client.privmsg,
-                                 event=event,
                                  expectedKeys=["user", "message"])
 
 

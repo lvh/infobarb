@@ -33,10 +33,10 @@ def eventHookMagic(cls):
 
         original = getattr(cls, callbackName)
         argNames = inspect.getargspec(original).args[1:]
-
         cls._builtinEventArgs[eventName] = argNames
 
         callback = _buildCallback(eventName, argNames)
+        callback.eventName = eventName
         setattr(cls, callbackName, callback)
 
     return cls
@@ -52,8 +52,8 @@ class InfobarbClient(irc.IRCClient):
     _supportedEvents = {
         "userJoined": "userJoined",
         "privmsgReceived": "privmsg",
-        "noticeReceived": "noticed",
-    }
+        "noticeReceived": "noticed"
+        }
 
     def __init__(self, boundPangler):
         self.p = boundPangler
