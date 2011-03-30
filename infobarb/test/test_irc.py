@@ -72,33 +72,52 @@ class DefaultDispatchHookTestCase(PanglerCallStubTestCase):
         irc.addDefaultDispatchHooks(self.p)
         self.nickname = "testbarb"
 
+    def _test_dispatchHook(self, sourceEvent, targetEvent, eventData):
+        stub = CallStub()
+        self.p.subscribe(stub, event=targetEvent, needs=eventData)
+        self.p.trigger(event=sourceEvent, **eventData)        
+
+        self.assertEventFired(stub, eventData)
+
 
     def test_privmsgReceived_privateMessage(self):
         eventData = _buildEventData("user", "message")
         eventData["channel"] = self.nickname
 
-        self.p.trigger(event="privmsgReceived", **eventData)
+        sourceEvent = "privmsgReceived"
+        targetEvent = "privateMessageReceived"
+
+        self._test_dispatchHook(sourceEvent, targetEvent, eventData)
 
 
     def test_privmsgReceived_channelMessage(self):
         eventData = _buildEventData("user", "channel", "message")
 
-        self.p.trigger(event="privmsgReceived", **eventData)
+        sourceEvent = "privmsgReceived"
+        targetEvent = "channelMessageReceived"
+
+        self._test_dispatchHook(sourceEvent, targetEvent, eventData)
 
 
     def test_noticeReceived_privateNotice(self):
         eventData = _buildEventData("user", "message")
         eventData["channel"] = self.nickname
 
-        self.p.trigger(event="noticeReceived", **eventData)
+        sourceEvent = "noticeReceived"
+        targetEvent = "privateNoticeReceived"
+
+        self._test_dispatchHook(sourceEvent, targetEvent, eventData)
 
 
-    def test_noticeReceived_privateNotice(self):
+    def test_noticeReceived_channelNotice(self):
         eventData = _buildEventData("user", "channel", "message")
 
-        self.p.trigger(event="noticeReceived", **eventData)
+        sourceEvent = "noticeReceived"
+        targetEvent = "channelNoticeReceived"
 
-        
+        self._test_dispatchHook(sourceEvent, targetEvent, eventData)
+
+
 
 class FancyInfobarbPanglerTestCase(PanglerCallStubTestCase):
     """
