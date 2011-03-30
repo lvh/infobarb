@@ -128,7 +128,11 @@ def shortcutMagic(cls):
     for event, eventInfo in cls._shortcuts.iteritems():
         shortcutName, needs = eventInfo["name"], eventInfo["args"]
         kwargs = {"event": event, "needs": needs}
-        setattr(cls, shortcutName, _buildShortcut(kwargs))
+
+        shortcut = _buildShortcut(kwargs)
+        shortcut.__name__ = shortcutName
+
+        setattr(cls, shortcutName, shortcut)
 
     return cls
 
