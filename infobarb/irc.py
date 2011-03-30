@@ -52,9 +52,13 @@ class InfobarbClient(irc.IRCClient):
     nickname = "infobarb"
 
     _supportedEvents = {
-        "userJoined": "userJoined",
         "privmsgReceived": "privmsg",
-        "noticeReceived": "noticed"
+        "noticeReceived": "noticed",
+
+        "userJoined": "userJoined",
+        "userLeft": "userLeft",
+        "userQuit": "userQuit",
+        "userKicked": "userKicked",
         }
 
     def __init__(self, boundPangler):
@@ -166,8 +170,13 @@ class FancyInfobarbPangler(object):
             "name": "onChannelNotice",
             "args": ("user", "channel", "message"),
             },
+
         "userJoined": {
             "name": "onUserJoin",
+            "args": ("user", "channel"),
+            },
+        "userLeft": {
+            "name": "onUserLeave",
             "args": ("user", "channel"),
             }
     }

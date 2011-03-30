@@ -203,6 +203,13 @@ class FancyInfobarbPanglerTestCase(PanglerCallStubTestCase):
         self._test_fancyShortcut(hook, event, eventData)
 
 
+    def test_onUserLeave(self):
+        hook = self.f.onUserLeave
+        event = "userLeft"
+        eventData = _buildEventData("user", "channel")
+        self._test_fancyShortcut(hook, event, eventData)
+
+
 
 ALL = object()
 
@@ -287,3 +294,14 @@ class ClientTestCase(PanglerCallStubTestCase):
         self._test_clientMessage(eventData=eventData,
                                  hook=self.f.onUserJoin,
                                  trigger=self.client.userJoined)
+
+
+    def test_userLeft(self):
+        """
+        A user leaving a channel fires userLeft.
+        """
+        eventData = _buildEventData("user", "channel")
+
+        self._test_clientMessage(eventData=eventData,
+                                 hook=self.f.onUserLeave,
+                                 trigger=self.client.userLeft)
